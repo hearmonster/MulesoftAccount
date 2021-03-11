@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="f279da9f-0cc9-4844-ace1-e10d354db2f0" >
+		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
+	</db:config>
+	<flow name="getAccounts" doc:id="f0dfef95-8136-4305-a63f-6cdbff2abf43" >
+		<db:select doc:name="Select" doc:id="f7a1cc37-2a6b-4ae3-8894-6cd18ab6aea0" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT *
+FROM flights_customers
+WHERE accountType = :type]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{'type' : message.attributes.queryParams['type'] }]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="FormatAsJson" doc:id="8f7ca547-6856-4235-ad55-992f191610df" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.accountID,
+	firstName: ((payload01.name default "<1stName>") splitBy(' '))[0],
+	lastName: ((payload01.name default "<2ndName>") splitBy(' '))[1],
+	address: ((payload01.street default "<street>") ++ ", " ++ (payload01.city default "<city>") ++ ", " ++ (payload01.state default "<state>")),
+	postal: payload01.postal default "<postal>",
+	country: payload01.country default "<country>",
+	miles: payload01.miles default -1,
+	creationDate: (payload01.creationDate as DateTime default "<dt>"),
+	"type": payload01.accountType default "<type>"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postAccounts" doc:id="393e086d-3144-41c2-93ba-d16640e7d43d" >
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="af01bfca-2f39-47ae-9b63-184dabe77c21" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Accounts *virtually* created"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="account_raml" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+displayName: Account
+description: Defines the fields in Account Datatype
+
+type: object
+properties:
+  id?:
+    type: string
+    example: '1234'
+  firstName:
+    type: string
+    example: 'Harry'
+  lastName:
+    type: string
+    example: Hearmonster
+  address:
+    type: string
+    example: 12 Moon Street
+  postal:
+    type: string
+    example: '60611'
+  country:
+    type: string
+    example: UK
+  miles:
+    type: integer
+    example: 999
+  creationDate?:
+    type: datetime
+    example: 2018-11-26T16:17:18Z
+  type:
+    displayName: Account Type
+    description: Type of account, such as Personal or Business
+    type: string
+    enum: [personal, business]]]></types:shape>
+    </types:type>
+    <types:type name="account_arr_raml" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+displayName: Accounts
+description: Array of Account Datatype
+
+type:
+  items:
+    properties:
+      id?:
+        type: string
+        example: '1234'
+      firstName:
+        type: string
+        example: 'Harry'
+      lastName:
+        type: string
+        example: Hearmonster
+      address:
+        type: string
+        example: 12 Moon Street
+      postal:
+        type: string
+        example: '60611'
+      country:
+        type: string
+        example: UK
+      miles:
+        type: integer
+        example: 999
+      creationDate?:
+        type: datetime
+        example: 2018-11-26T16:17:18Z
+        format: rfc3339
+      type:
+        displayName: Account Type
+        description: Type of account, such as Personal or Business
+        type: string
+        enum: [personal, business]]]></types:shape>
+    </types:type>
+    <types:type name="testArray" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+displayName: Testy
+description: Testytesty
+
+type:
+  items:
+    properties:
+      string1:
+        example: Example
+        type: string
+      number1:
+        example: 1
+        type: number
+        format: int
+      dt1:
+        example: 2021-03-11T15:35:10.928Z
+        type: datetime
+        format: rfc3339]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#8f7ca547-6856-4235-ad55-992f191610df"/>
+  <types:enrichment select="#f0dfef95-8136-4305-a63f-6cdbff2abf43">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="account_arr_raml"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
